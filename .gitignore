@@ -1,2 +1,4 @@
 .history
 input
+__pycache__
+main
