@@ -3,23 +3,6 @@ from typing import List, Tuple, overload
 import itertools
 
 @dataclass
-class Point:
-    x: int
-    y: int
-    
-    def __key(self):
-        return (self.x, self.y)
-    
-    def __hash__(self):
-        return hash(self.__key())
-
-    def __eq__(self, other):
-        if isinstance(other, Point):
-            return self.__key() == other.__key()
-        return NotImplemented
-
-
-@dataclass
 class VentLine:
     x1: int
     y1: int
@@ -34,7 +17,7 @@ class VentLine:
         self.y2 = point2[1]
         self.diag = diag
 
-    def yield_line_points(self) -> Point:
+    def yield_line_points(self) -> Tuple[int, int]:
         """
         Yields each point in line from p1 to p2, vertical, horizontal or diagonal
         """
@@ -45,26 +28,30 @@ class VentLine:
             for x in range(min(self.x1, self.x2), max(self.x1, self.x2) + 1):
                 yield (x, self.y1)
         elif self.diag:
-            for x, y in zip(range(min(self.x1, self.x2), max(self.x1, self.x2) + 1), range(min(self.y1, self.y2), max(self.y1, self.y2) + 1)):
+            x_dir = 1 if self.x1 < self.x2 else -1
+            y_dir = 1 if self.y1 < self.y2 else -1
+            for x, y in zip(
+                            range(self.x1, self.x2 + x_dir, x_dir),
+                            range(self.y1, self.y2 + y_dir, y_dir)
+                        ):
                 yield (x, y)
 
-    def line_points(self) -> List[Point]:
+    def line_points(self) -> List[Tuple[int, int]]:
         """
         Returns a list of all points in line from p1 to p2, vertical, horizontal or diagonal
         """
         return list(self.yield_line_points())
         
-    def get_intersection(self, other) -> Point:
+    def get_intersection(self, other) -> Tuple[int, int]:
         """
         Returns the intersection point between two lines
         """
-        for point in self.yield_line_points():
-            other_points = other.line_points()
-            if point in other_points:
-                yield point
-
-
-def get_input() -> List[VentLine]:
+        return list(
+            set(self.line_points()).intersection(set(other.line_points()))
+        )
+        
+        
+def get_input(diag = False) -> List[VentLine]:
     with open('5/input') as file:
         lines = file.readlines()
     ventlines = []
@@ -80,7 +67,8 @@ def get_input() -> List[VentLine]:
                 (
                     int(points[1][0]),
                     int(points[1][1])
-                )
+                ),
+                diag = diag
             )
         )
     return ventlines
@@ -89,14 +77,25 @@ def get_input() -> List[VentLine]:
 def part1():
     ventlines = get_input()
     overlaps = set()
-    for v1, v2 in itertools.pairwise(ventlines):
+    for v1, v2 in itertools.combinations(ventlines, 2):
         for intersections in v1.get_intersection(v2):
-            overlaps.update(intersections)
+            overlaps.add(intersections)
+
+    return len(overlaps)
+
+
+def part2():
+    ventlines = get_input(diag = True)
+    overlaps = set()
+    for v1, v2 in itertools.combinations(ventlines, 2):
+        for intersections in v1.get_intersection(v2):
+            overlaps.add(intersections)
 
     return len(overlaps)
 
 def main():
-    print(f'{part1()=}')
+    # print(f'{part1()=}')
+    print(f'{part2()=}')
 
 if __name__ == '__main__':
     main()
