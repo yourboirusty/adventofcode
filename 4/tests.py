@@ -46,7 +46,6 @@ def test_read_file():
     ])
 def test_diagonal_win(diagonal_input):
     board = Board(example_numbers)
-    random
     for number in diagonal_input:
         board.cross_matches(number)
     assert board.check_diagonal()
