@@ -56,7 +56,8 @@ class PathMap:
             else:
                 visited[node] += 1
             self.find_paths_part2(node, path, visited.copy())
-    
+
+            
 if __name__ == '__main__':
     data = get_data('12/input')
     path_map = PathMap(data)
